@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, abort
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -50,6 +50,55 @@ def get_posts():
     else:
         return jsonify(POSTS)
 
+
+@app.route('/api/posts/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    """ Allows the user to delete or update a post."""
+
+    for post in POSTS:
+        start_len = len(POSTS)
+        if post['id'] == post_id:
+            POSTS.remove(post)
+        end_len = len(POSTS)
+    if start_len == end_len:
+        return jsonify({
+            "message": f"Post with id {post_id} not found."
+        }), 404
+    else:
+        return jsonify({
+            "message": f"Post with id {post_id} successfully deleted."
+        }), 200
+
+
+@app.route('/api/posts/<int:post_id>', methods=['PUT'])
+def update_post(post_id):
+    """ Allows user to update a post."""
+    data = request.get_json()
+
+    for post in POSTS:
+        if post['id'] == post_id:
+            original_post = post
+        else:
+            original_post = None
+    if not original_post:
+        return jsonify({
+            "message": f"Post with id {post_id} not found."
+        }), 404
+
+    if "title" in data:
+        if not data["title"]:
+            pass
+        else:
+            original_post['title'] = data['title']
+
+    if "content" in data:
+        if not data["content"]:
+            pass
+        else:
+            original_post['content'] = data['content']
+
+
+    return jsonify(original_post), 200
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5002, debug=True)
