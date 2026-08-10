@@ -100,5 +100,29 @@ def update_post(post_id):
 
     return jsonify(original_post), 200
 
+
+@app.route('/api/posts/search', methods=['GET'])
+def search_posts():
+    """ Allows the user to search posts by title or content."""
+    search_title = request.args.get("title")
+    search_content = request.args.get("content")
+
+    results = POSTS
+
+    if search_title:
+        results = [
+            post for post in results
+            if search_title.lower() in post["title"].lower()
+        ]
+
+    if search_content:
+        results = [
+            post for post in results
+            if search_content.lower() in post["content"].lower()
+        ]
+
+    return jsonify(results), 200
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5002, debug=True)
