@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
+import file_management as fm
 
 
 app = Flask(__name__)
@@ -18,16 +19,18 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 )
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
-POSTS = [
-    {"id": 1, "title": "First post", "content": "This is the first post."},
-    {"id": 2, "title": "Second post", "content": "This is the second post."},
-]
+# posts = [
+#     {"id": 1, "title": "First post", "content": "This is the first post."},
+#     {"id": 2, "title": "Second post", "content": "This is the second post."},
+# ]
 
 
 @app.route("/api/posts", methods=["GET", "POST"])
 def get_posts():
     """ Sends posts database as JSON
         and adds new posts to database. """
+    posts = fm.get_posts()
+
     # Add post
     if request.method == "POST":
         data = request.get_json()
@@ -48,8 +51,8 @@ def get_posts():
                 "missing": missing_fields
             }), 400
 
-        if POSTS:
-            new_post_id = max(POST['id'] for POST in POSTS) + 1
+        if posts:
+            new_post_id = max(post['id'] for post in posts) + 1
         else:
             new_post_id = 1
 
@@ -59,9 +62,10 @@ def get_posts():
             "content": content
         }
 
-        POSTS.append(new_post)
+        posts.append(new_post)
+        fm.update_posts_db(posts)
 
-        return jsonify(POSTS), 201
+        return jsonify(posts), 201
     else:
         # List posts
         sort_by = request.args.get("sort")
@@ -78,56 +82,49 @@ def get_posts():
                     "message": "Sorting direction can only be 'asc' or 'desc'."
                 }), 400
 
-            if sort_by == "title" and direction == "asc":
-                sorted_posts = sorted(POSTS, key=lambda post: post['title'].lower())
-            elif sort_by == "title" and direction == "desc":
-                sorted_posts = sorted(POSTS, key=lambda post: post['title'].lower(), reverse=True)
-            elif sort_by == "content" and direction == "asc":
-                sorted_posts = sorted(POSTS, key=lambda post: post['content'].lower())
-            elif sort_by == "content" and direction == "desc":
-                sorted_posts = sorted(POSTS, key=lambda post: post['content'].lower(), reverse=True)
+            sorted_posts = sorted(
+                posts,
+                key=lambda post: post[sort_by].lower(),
+                reverse=direction == "desc"
+            )
+
             return jsonify(sorted_posts)
 
         if direction == "desc" and not sort_by:
-            sorted_posts = sorted(POSTS, key=lambda post: post['id'], reverse=True)
+            sorted_posts = sorted(posts, key=lambda post: post['id'], reverse=True)
             return jsonify(sorted_posts)
 
-        return jsonify(POSTS)
+        return jsonify(posts)
 
 
 @app.route('/api/posts/<int:post_id>', methods=['DELETE'])
 def delete_post(post_id):
     """ Allows the user to delete or update a post."""
+    posts = fm.get_posts()
 
-    start_len = 0
-    end_len = 0
-    for post in POSTS:
-        start_len = len(POSTS)
+    for post in posts:
         if post['id'] == post_id:
-            POSTS.remove(post)
-        end_len = len(POSTS)
-    if start_len == end_len:
-        return jsonify({
-            "message": f"Post with id {post_id} not found."
-        }), 404
-    else:
-        return jsonify({
-            "message": f"Post with id {post_id} successfully deleted."
-        }), 200
+            posts.remove(post)
+            fm.update_posts_db(posts)
+
+            return jsonify({
+                "message": f"Post with id {post_id} successfully deleted."
+            }), 200
+
+    return jsonify({
+        "message": f"Post with id {post_id} not found."
+    }), 404
 
 
 @app.route('/api/posts/<int:post_id>', methods=['PUT'])
 def update_post(post_id):
     """ Allows user to update a post."""
+    posts = fm.get_posts()
     data = request.get_json()
-    original_post = {}
 
-    for post in POSTS:
-        if post['id'] == post_id:
-            original_post = post
-        else:
-            original_post = None
-    if not original_post:
+    original_post = fm.get_post_by_id(post_id)
+
+    if original_post is None:
         return jsonify({
             "message": f"Post with id {post_id} not found."
         }), 404
@@ -144,6 +141,8 @@ def update_post(post_id):
         else:
             original_post['content'] = data['content']
 
+    fm.update_posts_db(posts)
+
 
     return jsonify(original_post), 200
 
@@ -154,7 +153,7 @@ def search_posts():
     search_title = request.args.get("title", type=str)
     search_content = request.args.get("content", type=str)
 
-    results = POSTS
+    results = fm.get_posts()
 
     if search_title:
         results = [
