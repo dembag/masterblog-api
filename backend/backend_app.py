@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -19,11 +20,9 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 )
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
-# posts = [
-#     {"id": 1, "title": "First post", "content": "This is the first post."},
-#     {"id": 2, "title": "Second post", "content": "This is the second post."},
-# ]
-
+# Anchor for file path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+POSTS_FILE = os.path.join(BASE_DIR, "posts.json")
 
 @app.route("/api/posts", methods=["GET", "POST"])
 def get_posts():
