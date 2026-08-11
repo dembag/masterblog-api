@@ -1,4 +1,4 @@
-import os
+
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_swagger_ui import get_swaggerui_blueprint
@@ -118,14 +118,14 @@ def update_post(post_id):
     posts = fm.get_posts()
     data = request.get_json()
 
-    original_post = None
+    original_post = {}
 
     for post in posts:
         if post['id'] == post_id:
             original_post = post
             break
 
-    if original_post is None:
+    if not original_post:
         return jsonify({
             "message": f"Post with id {post_id} not found."
         }), 404
