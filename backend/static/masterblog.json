@@ -1,0 +1,227 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Masterblog API",
+    "version": "1.0.0"
+  },
+  "host": "localhost:5002",
+  "basePath": "/",
+  "schemes": [
+    "http"
+  ],
+
+  "tags": [
+    {
+      "name": "Post",
+      "description": "Post API - CRUD"
+    }
+  ],
+  "paths": {
+    "/api/posts": {
+              "get": {
+                "summary": "Returns all posts",
+                "produces": [
+                  "application/json"
+                ],
+                "tags": [
+                  "Post"
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Successful operation"
+                  }
+                }
+              },
+              "post": {
+                "summary": "Creates a new post.",
+                "tags": [
+                  "Post"
+                ],
+                "consumes": [
+                  "application/json"
+                ],
+                "produces": [
+                  "application/json"
+                ],
+                "parameters": [
+                  {
+                    "in": "body",
+                    "name": "post",
+                    "required": true,
+                    "schema": {
+                      "$ref": "#/definitions/PostInput"
+                    }
+                  }
+                ],
+                "responses": {
+                  "201": {
+                    "description": "Post successfully created"
+                  },
+                  "400": {
+                    "description": "Missing required fields"
+                  }
+                }
+              }
+    },
+    "/api/posts/{id}": {
+              "put": {
+                "summary": "Updates an existing post",
+                "tags": [
+                  "Post"
+                ],
+                "consumes": [
+                  "application/json"
+                ],
+                "produces": [
+                  "application/json"
+                ],
+                "parameters": [
+                  {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                  },
+                  {
+                    "in": "body",
+                    "name": "post",
+                    "required": true,
+                    "schema": {
+                      "$ref": "#/definitions/PostUpdate"
+                    }
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Post successfully updated"
+                  },
+                  "400": {
+                    "description": "Post not found"
+                  }
+                }
+              },
+              "delete": {
+                "summary": "Deletes a post",
+                "tags": [
+                  "Post"
+                ],
+                "produces": [
+                  "application/json"
+                ],
+                "parameters": [
+                  {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "integer"
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Post successfully deleted"
+                  },
+                  "400": {
+                    "description": "Post not found"
+                  }
+                }
+              }
+    },
+    "/api/posts/search": {
+              "get": {
+                "summary": "Searches posts by title or content",
+                "tags": [
+                  "Post"
+                ],
+                "produces": [
+                  "application/json"
+                ],
+                "parameters": [
+                  {
+                    "name": "title",
+                    "in": "query",
+                    "required": false,
+                    "type": "string",
+                    "description": "Search for posts by title"
+                  },
+                  {
+                    "name": "content",
+                    "in": "query",
+                    "required": false,
+                    "type": "string",
+                    "description": "Search for posts by content"
+                  },
+                  {
+                    "name": "sort",
+                    "in": "query",
+                    "required": false,
+                    "type": "string",
+                    "default": "id",
+                    "description": "Used to sort the results"
+                  },
+                  {
+                    "name": "direction",
+                    "in": "query",
+                    "required": false,
+                    "type": "string",
+                    "default": "asc",
+                    "description": "Sort direction ascending or descending"
+                  }
+                ],
+                "responses": {
+                  "200": {
+                    "description": "Successful operation"
+                  }
+                }
+              }
+    }
+  },
+  "definitions": {
+    "Post": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "example": 1
+        },
+        "title": {
+          "type": "string",
+          "example": "First Title"
+        },
+        "content": {
+          "type": "string",
+          "example": "This is the content of the first post."
+        }
+      }
+    },
+    "PostInput": {
+      "type": "object",
+      "required": [
+        "title",
+        "content"
+      ],
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "My new post"
+        },
+        "content": {
+          "type": "string",
+          "example": "This is the content of the new post"
+        }
+      }
+    },
+    "PostUpdate": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Updated title"
+        },
+        "content": {
+          "type": "string",
+          "example": "Updated content"
+        }
+      }
+    }
+  }
+}
