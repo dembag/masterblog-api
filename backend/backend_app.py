@@ -20,9 +20,6 @@ swagger_ui_blueprint = get_swaggerui_blueprint(
 )
 app.register_blueprint(swagger_ui_blueprint, url_prefix=SWAGGER_URL)
 
-# Anchor for file path
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-POSTS_FILE = os.path.join(BASE_DIR, "posts.json")
 
 @app.route("/api/posts", methods=["GET", "POST"])
 def get_posts():
@@ -69,7 +66,7 @@ def get_posts():
         # List posts
         sort_by = request.args.get("sort")
         direction = request.args.get("direction", "asc")
-        sorted_posts = []
+
 
         if sort_by:
             if sort_by != "title" and sort_by != "content":

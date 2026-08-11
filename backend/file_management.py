@@ -1,7 +1,9 @@
 import json
 import os
 
-from backend.backend_app import POSTS_FILE
+# Anchor for file path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+POSTS_FILE = os.path.join(BASE_DIR, "posts.json")
 
 
 def get_posts():
