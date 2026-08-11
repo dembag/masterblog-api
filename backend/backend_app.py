@@ -118,7 +118,12 @@ def update_post(post_id):
     posts = fm.get_posts()
     data = request.get_json()
 
-    original_post = fm.get_post_by_id(post_id)
+    original_post = None
+
+    for post in posts:
+        if post['id'] == post_id:
+            original_post = post
+            break
 
     if original_post is None:
         return jsonify({
@@ -139,7 +144,6 @@ def update_post(post_id):
 
     fm.update_posts_db(posts)
 
-
     return jsonify(original_post), 200
 
 
@@ -148,6 +152,11 @@ def search_posts():
     """ Allows the user to search posts by title or content."""
     search_title = request.args.get("title", type=str)
     search_content = request.args.get("content", type=str)
+
+    if search_title and search_content:
+        return jsonify({
+                    "message": "Posts can only be searched by 'title' OR 'content'."
+                }), 400
 
     results = fm.get_posts()
 
